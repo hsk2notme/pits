@@ -75,9 +75,28 @@
             border-color: #cbd5e1;
             background-color: #f1f5f9;
         }
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s;
+        }
     </style>
 </head>
 <body class="antialiased">
+    <div id="loading" class="loading-overlay">
+        <div class="text-center">
+            <svg class="animate-spin h-8 w-8 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="mt-2 text-gray-600">Đang kết nối và tải dữ liệu...</p>
+        </div>
+    </div>
 
     <header class="bg-white shadow-md sticky top-0 z-50">
         <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
@@ -175,25 +194,86 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const tasks = [
-                { id: '1.1', category: 'backend', title: 'Khởi tạo Database', details: "- Tạo database `Web_HRM` trên PostgreSQL.<br>- Cấu hình quyền truy cập cho server.", assignee: 'Chưa gán' },
-                { id: '1.2', category: 'backend', title: 'Tạo Bảng `users`', details: "- Triển khai các trường: `id`, `full_name`, `email`, `department`, `work_type`, `password_hash`, `is_admin`, `is_password_default`, `created_at`.<br>- Thiết lập `id` là PRIMARY KEY, `email` là UNIQUE.", assignee: 'Chưa gán' },
-                { id: '1.3', category: 'backend', title: 'Tạo Bảng `shifts`', details: "- Triển khai các trường: `id`, `shift_name`.<br>- Thêm dữ liệu ban đầu: 'Sáng', 'Chiều', 'Tối'.", assignee: 'Chưa gán' },
-                { id: '1.4', category: 'backend', title: 'Tạo Bảng `employee_schedules`', details: "- Triển khai các trường cần thiết.<br>- Thiết lập FOREIGN KEY đến `users` và `shifts`.", assignee: 'Chưa gán' },
-                { id: '1.5', category: 'backend', title: 'Cấu hình Server', details: "- Cài đặt Node.js, Express, pg, bcrypt, jsonwebtoken.<br>- Thiết lập kết nối đến database `Web_HRM`.", assignee: 'Chưa gán' },
-                { id: '1.6', category: 'backend', title: 'Xây dựng API Đăng nhập', details: "- Endpoint `POST /api/login`.<br>- Xác thực user, trả về JWT.<br>- Xử lý logic đổi mật khẩu lần đầu.", assignee: 'Chưa gán' },
-                { id: '1.7', category: 'backend', title: 'Xây dựng API Quản lý Ca làm (CRUD)', details: "- `POST /api/schedules`<br>- `GET /api/schedules/:userId`<br>- `PUT /api/schedules/:scheduleId`", assignee: 'Chưa gán' },
-                { id: '1.8', category: 'backend', title: 'Xây dựng API cho Admin', details: "- `GET /api/admin/schedules` với filter theo phòng ban.", assignee: 'Chưa gán' },
-                { id: '2.1', category: 'frontend', title: 'Xây dựng Trang Đăng nhập', details: "- Giao diện gồm 2 trường: Mã nhân viên, Mật khẩu.<br>- Tích hợp API Đăng nhập, lưu JWT.<br>- Tự động chuyển hướng.", assignee: 'Chưa gán' },
-                { id: '2.2', category: 'frontend', title: 'Xây dựng Giao diện Chung (Dashboard)', details: "- Bố cục cơ bản, hiển thị thông tin cá nhân.<br>- Tạo thanh điều hướng.", assignee: 'Chưa gán' },
-                { id: '2.3', category: 'frontend', title: 'Xây dựng Giao diện Đăng ký Ca làm', details: "- Lịch trực quan theo tháng.<br>- Modal chọn ca (Sáng, Chiều, Tối, Nửa ca).<br>- Tích hợp API `POST /api/schedules`.<br>- Hiển thị màu sắc theo trạng thái ca.", assignee: 'Chưa gán' },
-                { id: '2.4', category: 'frontend', title: 'Xây dựng Giao diện Xem lại Ca làm', details: "- Tích hợp API `GET /api/schedules/:userId`.<br>- Hiển thị lịch sử ca dưới dạng lịch hoặc danh sách.", assignee: 'Chưa gán' },
-                { id: '3.1', category: 'admin', title: 'Xây dựng Giao diện Bảng Quản lý', details: "- Thiết kế giao diện dạng bảng (table/grid) tương tự Google Sheet.<br>- Hàng: Tên nhân viên. Cột: Các ngày trong tháng.", assignee: 'Chưa gán' },
-                { id: '3.2', category: 'admin', title: 'Tích hợp API Lấy Dữ liệu', details: "- Gọi API `GET /api/admin/schedules` để hiển thị dữ liệu lên bảng.", assignee: 'Chưa gán' },
-                { id: '3.3', category: 'admin', title: 'Xây dựng Chức năng Lọc', details: "- Tạo dropdown/ô tìm kiếm để lọc theo phòng ban.<br>- Gọi lại API khi filter thay đổi.", assignee: 'Chưa gán' },
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, doc, onSnapshot, updateDoc, setDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            const loadingOverlay = document.getElementById('loading');
+            
+            let tasks = [];
+            let db;
+
+            try {
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'hrm-dashboard-default';
+                const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
+                const firebaseConfig = JSON.parse(firebaseConfigStr);
+                
+                if (!firebaseConfig.apiKey) {
+                    loadingOverlay.innerHTML = '<p class="text-red-500 font-bold">Lỗi: Không tìm thấy cấu hình Firebase.</p>';
+                    return;
+                }
+
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                const auth = getAuth(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                loadingOverlay.innerHTML = '<p class="text-red-500 font-bold">Không thể kết nối đến cơ sở dữ liệu.</p>';
+                return;
+            }
+            
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'hrm-dashboard-default';
+            const tasksColRef = collection(db, `artifacts/${appId}/public/data/tasks`);
+
+            const initialTasks = [
+                { id: '1.1', category: 'backend', title: 'Khởi tạo Database', details: "- Tạo database `Web_HRM` trên PostgreSQL.<br>- Cấu hình quyền truy cập cho server.", assignee: 'Chưa gán', completed: false },
+                { id: '1.2', category: 'backend', title: 'Tạo Bảng `users`', details: "- Triển khai các trường: `id`, `full_name`, `email`, `department`, `work_type`, `password_hash`, `is_admin`, `is_password_default`, `created_at`.<br>- Thiết lập `id` là PRIMARY KEY, `email` là UNIQUE.", assignee: 'Chưa gán', completed: false },
+                { id: '1.3', category: 'backend', title: 'Tạo Bảng `shifts`', details: "- Triển khai các trường: `id`, `shift_name`.<br>- Thêm dữ liệu ban đầu: 'Sáng', 'Chiều', 'Tối'.", assignee: 'Chưa gán', completed: false },
+                { id: '1.4', category: 'backend', title: 'Tạo Bảng `employee_schedules`', details: "- Triển khai các trường cần thiết.<br>- Thiết lập FOREIGN KEY đến `users` và `shifts`.", assignee: 'Chưa gán', completed: false },
+                { id: '1.5', category: 'backend', title: 'Cấu hình Server', details: "- Cài đặt Node.js, Express, pg, bcrypt, jsonwebtoken.<br>- Thiết lập kết nối đến database `Web_HRM`.", assignee: 'Chưa gán', completed: false },
+                { id: '1.6', category: 'backend', title: 'Xây dựng API Đăng nhập', details: "- Endpoint `POST /api/login`.<br>- Xác thực user, trả về JWT.<br>- Xử lý logic đổi mật khẩu lần đầu.", assignee: 'Chưa gán', completed: false },
+                { id: '1.7', category: 'backend', title: 'Xây dựng API Quản lý Ca làm (CRUD)', details: "- `POST /api/schedules`<br>- `GET /api/schedules/:userId`<br>- `PUT /api/schedules/:scheduleId`", assignee: 'Chưa gán', completed: false },
+                { id: '1.8', category: 'backend', title: 'Xây dựng API cho Admin', details: "- `GET /api/admin/schedules` với filter theo phòng ban.", assignee: 'Chưa gán', completed: false },
+                { id: '2.1', category: 'frontend', title: 'Xây dựng Trang Đăng nhập', details: "- Giao diện gồm 2 trường: Mã nhân viên, Mật khẩu.<br>- Tích hợp API Đăng nhập, lưu JWT.<br>- Tự động chuyển hướng.", assignee: 'Chưa gán', completed: false },
+                { id: '2.2', category: 'frontend', title: 'Xây dựng Giao diện Chung (Dashboard)', details: "- Bố cục cơ bản, hiển thị thông tin cá nhân.<br>- Tạo thanh điều hướng.", assignee: 'Chưa gán', completed: false },
+                { id: '2.3', category: 'frontend', title: 'Xây dựng Giao diện Đăng ký Ca làm', details: "- Lịch trực quan theo tháng.<br>- Modal chọn ca (Sáng, Chiều, Tối, Nửa ca).<br>- Tích hợp API `POST /api/schedules`.<br>- Hiển thị màu sắc theo trạng thái ca.", assignee: 'Chưa gán', completed: false },
+                { id: '2.4', category: 'frontend', title: 'Xây dựng Giao diện Xem lại Ca làm', details: "- Tích hợp API `GET /api/schedules/:userId`.<br>- Hiển thị lịch sử ca dưới dạng lịch hoặc danh sách.", assignee: 'Chưa gán', completed: false },
+                { id: '3.1', category: 'admin', title: 'Xây dựng Giao diện Bảng Quản lý', details: "- Thiết kế giao diện dạng bảng (table/grid) tương tự Google Sheet.<br>- Hàng: Tên nhân viên. Cột: Các ngày trong tháng.", assignee: 'Chưa gán', completed: false },
+                { id: '3.2', category: 'admin', title: 'Tích hợp API Lấy Dữ liệu', details: "- Gọi API `GET /api/admin/schedules` để hiển thị dữ liệu lên bảng.", assignee: 'Chưa gán', completed: false },
+                { id: '3.3', category: 'admin', title: 'Xây dựng Chức năng Lọc', details: "- Tạo dropdown/ô tìm kiếm để lọc theo phòng ban.<br>- Gọi lại API khi filter thay đổi.", assignee: 'Chưa gán', completed: false },
             ];
+
+            async function initializeData() {
+                const snapshot = await getDocs(tasksColRef);
+                if (snapshot.empty) {
+                    const batch = writeBatch(db);
+                    initialTasks.forEach(task => {
+                        const docRef = doc(tasksColRef, task.id);
+                        batch.set(docRef, task);
+                    });
+                    await batch.commit();
+                }
+            }
+            
+            await initializeData();
+            
+            onSnapshot(tasksColRef, (snapshot) => {
+                tasks = snapshot.docs.map(doc => ({ ...doc.data() }));
+                tasks.sort((a, b) => parseFloat(a.id) - parseFloat(b.id));
+                const currentFilter = document.querySelector('.filter-btn.bg-blue-500')?.dataset.filter || 'all';
+                renderTasks(currentFilter);
+                loadingOverlay.style.opacity = '0';
+                setTimeout(() => loadingOverlay.style.display = 'none', 300);
+            });
 
             const dbSchema = {
                 users: {
@@ -248,6 +328,7 @@
             };
 
             function renderTasks(filter = 'all') {
+                if (!tasks) return;
                 taskContainer.innerHTML = '';
                 const filteredTasks = filter === 'all' ? tasks : tasks.filter(t => t.category === filter);
 
@@ -266,7 +347,7 @@
                         </div>
                         <div class="mt-4 pt-4 border-t flex justify-between items-center">
                             <div class="flex items-center">
-                                <input type="checkbox" id="task-${task.id}" data-task-id="${task.id}" class="task-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <input type="checkbox" id="task-${task.id}" data-task-id="${task.id}" class="task-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500" ${task.completed ? 'checked' : ''}>
                                 <label for="task-${task.id}" class="ml-3 block text-sm font-medium text-gray-700">Hoàn thành</label>
                             </div>
                             <div class="assignee-container text-sm text-gray-600" data-task-id="${task.id}">
@@ -281,8 +362,8 @@
             }
 
             function updateProgress() {
-                const checkboxes = document.querySelectorAll('.task-checkbox');
-                const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+                if (!tasks) return;
+                const checkedCount = tasks.filter(t => t.completed).length;
                 const totalTasks = tasks.length;
                 const percentage = totalTasks > 0 ? Math.round((checkedCount / totalTasks) * 100) : 0;
                 
@@ -290,9 +371,16 @@
                 masterProgressBar.textContent = `${percentage}%`;
             }
 
-            taskContainer.addEventListener('change', (e) => {
+            taskContainer.addEventListener('change', async (e) => {
                 if (e.target.classList.contains('task-checkbox')) {
-                    updateProgress();
+                    const taskId = e.target.dataset.taskId;
+                    const completed = e.target.checked;
+                    const taskDocRef = doc(db, `artifacts/${appId}/public/data/tasks`, taskId);
+                    try {
+                        await updateDoc(taskDocRef, { completed: completed });
+                    } catch (error) {
+                        console.error("Error updating task status: ", error);
+                    }
                 }
             });
 
@@ -305,20 +393,22 @@
                 });
             });
 
-            function saveAssignee(inputElement) {
+            async function saveAssignee(inputElement) {
                 const container = inputElement.parentElement;
                 const nameSpan = container.querySelector('.assignee-name');
                 const taskId = container.dataset.taskId;
-                const task = tasks.find(t => t.id === taskId);
-
+                
                 const newName = inputElement.value.trim();
+                
                 if (newName) {
-                    task.assignee = newName;
-                    nameSpan.innerHTML = `👤 ${newName}`;
-                } else {
-                    inputElement.value = task.assignee;
+                    const taskDocRef = doc(db, `artifacts/${appId}/public/data/tasks`, taskId);
+                    try {
+                        await updateDoc(taskDocRef, { assignee: newName });
+                    } catch (error) {
+                         console.error("Error updating assignee: ", error);
+                    }
                 }
-
+                
                 inputElement.classList.add('hidden');
                 nameSpan.classList.remove('hidden');
             }
@@ -346,8 +436,6 @@
                     saveAssignee(e.target);
                 }
             });
-
-            renderTasks();
 
             const timelineCtx = document.getElementById('timelineChart').getContext('2d');
             new Chart(timelineCtx, {
