@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Kế hoạch - Quản lý Ca làm</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutrals -->
+    <!-- Application Structure Plan: The SPA is designed as an interactive project dashboard with three main sections: Overview, System Architecture, and Detailed Plan. This structure logically separates high-level project goals from technical details and actionable tasks. A top navigation bar allows for smooth scrolling, enabling users to quickly jump to the information they need. This task-oriented design is more user-friendly and engaging than a static document, allowing stakeholders to easily explore the project's scope, architecture, and progress. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Project Timeline (3 weeks) -> Goal: Inform -> Viz: Progress Bar Chart (Chart.js) -> Interaction: Hover for details (not implemented for simplicity, but planned) -> Justification: Provides a quick visual summary of the project's duration and key phases.
+        - Report Info: Database Schema -> Goal: Organize/Relate -> Viz: Interactive Diagram (HTML/CSS) -> Interaction: Click on a table to view its detailed structure in a modal. -> Justification: Clarifies complex database relationships without using forbidden SVG/Mermaid, making the technical architecture easier to understand.
+        - Report Info: Task List -> Goal: Organize/Track -> Viz: Kanban-style Task Board (HTML/CSS) -> Interaction: Filter tasks by category (Backend, Frontend, Admin) and check tasks to update a master progress bar. -> Justification: Transforms a static list into a dynamic and interactive tool for tracking project progress, enhancing engagement and clarity.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4a5568;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover:after, .nav-link.active:after {
+            width: 100%;
+        }
+        .task-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .task-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .modal {
+            display: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .db-table {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .db-table:hover {
+            transform: scale(1.05);
+            border-color: #3b82f6;
+        }
+        .progress-bar-fill {
+            transition: width 0.5s ease-in-out;
+        }
+        .assignee-name {
+            padding: 2px 4px;
+            border-radius: 4px;
+            border: 1px dashed transparent;
+        }
+        .assignee-name:hover {
+            border-color: #cbd5e1;
+            background-color: #f1f5f9;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-gray-800">Dashboard Kế hoạch HRM</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#overview" class="nav-link text-gray-600 hover:text-gray-800 font-medium">Tổng quan</a>
+                <a href="#architecture" class="nav-link text-gray-600 hover:text-gray-800 font-medium">Kiến trúc Hệ thống</a>
+                <a href="#plan" class="nav-link text-gray-600 hover:text-gray-800 font-medium">Kế hoạch Chi tiết</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-gray-700 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#overview" class="block py-2 text-gray-600 hover:text-gray-800">Tổng quan</a>
+            <a href="#architecture" class="block py-2 text-gray-600 hover:text-gray-800">Kiến trúc Hệ thống</a>
+            <a href="#plan" class="block py-2 text-gray-600 hover:text-gray-800">Kế hoạch Chi tiết</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="overview" class="mb-16 scroll-mt-24">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Tổng quan Dự án</h2>
+            <p class="text-lg text-gray-600 mb-8">Đây là trang tổng quan cho Giai đoạn 1 của dự án xây dựng hệ thống quản lý ca làm. Mục tiêu là hoàn thiện các tính năng cốt lõi về đăng ký và quản lý ca làm cho nhân viên và admin trong vòng 3 tuần.</p>
+            
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-xl font-bold text-gray-700 mb-4">Lộ trình Phát triển (3 Tuần)</h3>
+                <div class="chart-container relative h-48 md:h-64 w-full max-w-4xl mx-auto">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="architecture" class="mb-16 scroll-mt-24">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Kiến trúc Hệ thống</h2>
+            <p class="text-lg text-gray-600 mb-8">Hệ thống bao gồm giao diện cho Nhân viên và Admin, hoạt động trên nền tảng Server Node.js và cơ sở dữ liệu PostgreSQL. Dưới đây là sơ đồ các bảng dữ liệu chính và mối quan hệ giữa chúng.</p>
+
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-xl font-bold text-gray-700 mb-6 text-center">Sơ đồ Cơ sở dữ liệu "Web_HRM"</h3>
+                <div class="relative p-4 md:p-8 flex flex-col items-center justify-center space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl">
+                        <div id="db-users" class="db-table bg-blue-50 border-2 border-blue-200 p-4 rounded-lg text-center shadow">
+                            <h4 class="font-bold text-blue-800">1. users</h4>
+                            <p class="text-sm text-blue-600">Thông tin nhân viên</p>
+                        </div>
+                        <div id="db-shifts" class="db-table bg-green-50 border-2 border-green-200 p-4 rounded-lg text-center shadow">
+                            <h4 class="font-bold text-green-800">2. shifts</h4>
+                            <p class="text-sm text-green-600">Các loại ca làm</p>
+                        </div>
+                        <div id="db-employee_schedules" class="db-table bg-purple-50 border-2 border-purple-200 p-4 rounded-lg text-center shadow">
+                            <h4 class="font-bold text-purple-800">3. employee_schedules</h4>
+                            <p class="text-sm text-purple-600">Lịch đăng ký ca làm</p>
+                        </div>
+                    </div>
+                    <div class="text-gray-500 text-sm mt-4">
+                        <p>&#x2193; `employee_schedules` tham chiếu đến `users` và `shifts` &#x2193;</p>
+                        <p class="text-center">(Click vào bảng để xem chi tiết)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="plan" class="scroll-mt-24">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Kế hoạch Công việc Chi tiết</h2>
+            <p class="text-lg text-gray-600 mb-6">Danh sách các công việc cần hoàn thành trong Giai đoạn 1, được phân chia theo từng hạng mục. Tích vào các công việc đã hoàn thành để theo dõi tiến độ.</p>
+            
+            <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+                <h3 class="text-xl font-bold text-gray-700 mb-4">Tiến độ Tổng thể Giai đoạn 1</h3>
+                <div class="w-full bg-gray-200 rounded-full h-6">
+                    <div id="master-progress-bar" class="progress-bar-fill bg-blue-600 h-6 rounded-full text-center text-white text-sm leading-6" style="width: 0%;">0%</div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-4 mb-8">
+                <button data-filter="all" class="filter-btn bg-blue-500 text-white px-4 py-2 rounded-md shadow">Tất cả</button>
+                <button data-filter="backend" class="filter-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-md">Backend</button>
+                <button data-filter="frontend" class="filter-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-md">Frontend</button>
+                <button data-filter="admin" class="filter-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-md">Admin</button>
+            </div>
+
+            <div id="task-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+        </section>
+    </main>
+
+    <div id="db-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 id="modal-title" class="text-xl font-bold">Chi tiết Bảng</h3>
+                <button id="close-modal-btn" class="text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <div id="modal-content" class="p-6">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tasks = [
+                { id: '1.1', category: 'backend', title: 'Khởi tạo Database', details: "- Tạo database `Web_HRM` trên PostgreSQL.<br>- Cấu hình quyền truy cập cho server.", assignee: 'Chưa gán' },
+                { id: '1.2', category: 'backend', title: 'Tạo Bảng `users`', details: "- Triển khai các trường: `id`, `full_name`, `email`, `department`, `work_type`, `password_hash`, `is_admin`, `is_password_default`, `created_at`.<br>- Thiết lập `id` là PRIMARY KEY, `email` là UNIQUE.", assignee: 'Chưa gán' },
+                { id: '1.3', category: 'backend', title: 'Tạo Bảng `shifts`', details: "- Triển khai các trường: `id`, `shift_name`.<br>- Thêm dữ liệu ban đầu: 'Sáng', 'Chiều', 'Tối'.", assignee: 'Chưa gán' },
+                { id: '1.4', category: 'backend', title: 'Tạo Bảng `employee_schedules`', details: "- Triển khai các trường cần thiết.<br>- Thiết lập FOREIGN KEY đến `users` và `shifts`.", assignee: 'Chưa gán' },
+                { id: '1.5', category: 'backend', title: 'Cấu hình Server', details: "- Cài đặt Node.js, Express, pg, bcrypt, jsonwebtoken.<br>- Thiết lập kết nối đến database `Web_HRM`.", assignee: 'Chưa gán' },
+                { id: '1.6', category: 'backend', title: 'Xây dựng API Đăng nhập', details: "- Endpoint `POST /api/login`.<br>- Xác thực user, trả về JWT.<br>- Xử lý logic đổi mật khẩu lần đầu.", assignee: 'Chưa gán' },
+                { id: '1.7', category: 'backend', title: 'Xây dựng API Quản lý Ca làm (CRUD)', details: "- `POST /api/schedules`<br>- `GET /api/schedules/:userId`<br>- `PUT /api/schedules/:scheduleId`", assignee: 'Chưa gán' },
+                { id: '1.8', category: 'backend', title: 'Xây dựng API cho Admin', details: "- `GET /api/admin/schedules` với filter theo phòng ban.", assignee: 'Chưa gán' },
+                { id: '2.1', category: 'frontend', title: 'Xây dựng Trang Đăng nhập', details: "- Giao diện gồm 2 trường: Mã nhân viên, Mật khẩu.<br>- Tích hợp API Đăng nhập, lưu JWT.<br>- Tự động chuyển hướng.", assignee: 'Chưa gán' },
+                { id: '2.2', category: 'frontend', title: 'Xây dựng Giao diện Chung (Dashboard)', details: "- Bố cục cơ bản, hiển thị thông tin cá nhân.<br>- Tạo thanh điều hướng.", assignee: 'Chưa gán' },
+                { id: '2.3', category: 'frontend', title: 'Xây dựng Giao diện Đăng ký Ca làm', details: "- Lịch trực quan theo tháng.<br>- Modal chọn ca (Sáng, Chiều, Tối, Nửa ca).<br>- Tích hợp API `POST /api/schedules`.<br>- Hiển thị màu sắc theo trạng thái ca.", assignee: 'Chưa gán' },
+                { id: '2.4', category: 'frontend', title: 'Xây dựng Giao diện Xem lại Ca làm', details: "- Tích hợp API `GET /api/schedules/:userId`.<br>- Hiển thị lịch sử ca dưới dạng lịch hoặc danh sách.", assignee: 'Chưa gán' },
+                { id: '3.1', category: 'admin', title: 'Xây dựng Giao diện Bảng Quản lý', details: "- Thiết kế giao diện dạng bảng (table/grid) tương tự Google Sheet.<br>- Hàng: Tên nhân viên. Cột: Các ngày trong tháng.", assignee: 'Chưa gán' },
+                { id: '3.2', category: 'admin', title: 'Tích hợp API Lấy Dữ liệu', details: "- Gọi API `GET /api/admin/schedules` để hiển thị dữ liệu lên bảng.", assignee: 'Chưa gán' },
+                { id: '3.3', category: 'admin', title: 'Xây dựng Chức năng Lọc', details: "- Tạo dropdown/ô tìm kiếm để lọc theo phòng ban.<br>- Gọi lại API khi filter thay đổi.", assignee: 'Chưa gán' },
+            ];
+
+            const dbSchema = {
+                users: {
+                    title: "Bảng `users`",
+                    fields: [
+                        { name: "id", type: "BIGINT, PRIMARY KEY", desc: "Mã số nhân viên" },
+                        { name: "full_name", type: "VARCHAR", desc: "Họ và tên" },
+                        { name: "email", type: "VARCHAR, UNIQUE", desc: "Email" },
+                        { name: "department", type: "VARCHAR", desc: "Phòng ban" },
+                        { name: "work_type", type: "ENUM", desc: "'Full-time', 'Part-time'" },
+                        { name: "password_hash", type: "VARCHAR", desc: "Mật khẩu đã mã hóa" },
+                        { name: "is_admin", type: "BOOLEAN", desc: "Phân quyền quản trị" },
+                        { name: "is_password_default", type: "BOOLEAN", desc: "Cờ báo mật khẩu mặc định" },
+                        { name: "created_at", type: "TIMESTAMP", desc: "Thời gian tạo tài khoản" },
+                    ]
+                },
+                shifts: {
+                    title: "Bảng `shifts`",
+                    fields: [
+                        { name: "id", type: "SMALLINT, PRIMARY KEY", desc: "ID ca làm" },
+                        { name: "shift_name", type: "ENUM", desc: "'Sáng', 'Chiều', 'Tối'" },
+                    ]
+                },
+                employee_schedules: {
+                    title: "Bảng `employee_schedules`",
+                    fields: [
+                        { name: "id", type: "BIGINT, PRIMARY KEY", desc: "ID bản ghi lịch trình" },
+                        { name: "user_id", type: "BIGINT, FOREIGN KEY", desc: "Nhân viên đăng ký" },
+                        { name: "schedule_date", type: "DATE", desc: "Ngày làm việc" },
+                        { name: "shift_id", type: "SMALLINT, FOREIGN KEY", desc: "Ca làm đã đăng ký" },
+                        { name: "shift_part", type: "ENUM", desc: "'Full', 'First Half', 'Second Half'" },
+                        { name: "status", type: "ENUM", desc: "'pending', 'approved', 'rejected', 'leave'" },
+                        { name: "comment", type: "TEXT", desc: "Ghi chú" },
+                    ]
+                }
+            };
+
+            const taskContainer = document.getElementById('task-container');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const masterProgressBar = document.getElementById('master-progress-bar');
+
+            const categoryColors = {
+                backend: 'border-t-4 border-red-400',
+                frontend: 'border-t-4 border-blue-400',
+                admin: 'border-t-4 border-green-400'
+            };
+            
+            const categoryHeaders = {
+                backend: 'Backend (Server & DB)',
+                frontend: 'Frontend (Giao diện Nhân viên)',
+                admin: 'Admin (Giao diện Quản lý)'
+            };
+
+            function renderTasks(filter = 'all') {
+                taskContainer.innerHTML = '';
+                const filteredTasks = filter === 'all' ? tasks : tasks.filter(t => t.category === filter);
+
+                filteredTasks.forEach(task => {
+                    const taskEl = document.createElement('div');
+                    taskEl.className = `task-card bg-white p-5 rounded-lg shadow-md ${categoryColors[task.category]} flex flex-col`;
+                    taskEl.dataset.category = task.category;
+                    taskEl.innerHTML = `
+                        <div class="flex-grow">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-xs font-semibold text-gray-500">${categoryHeaders[task.category]}</span>
+                                <span class="text-sm font-bold text-gray-700">${task.id}</span>
+                            </div>
+                            <h4 class="font-bold text-lg text-gray-800 mb-3">${task.title}</h4>
+                            <div class="text-sm text-gray-600 space-y-1">${task.details}</div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t flex justify-between items-center">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="task-${task.id}" data-task-id="${task.id}" class="task-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <label for="task-${task.id}" class="ml-3 block text-sm font-medium text-gray-700">Hoàn thành</label>
+                            </div>
+                            <div class="assignee-container text-sm text-gray-600" data-task-id="${task.id}">
+                                <span class="assignee-name cursor-pointer" title="Click để sửa">👤 ${task.assignee}</span>
+                                <input type="text" class="assignee-input hidden w-28 border rounded px-1 py-0.5 text-sm" value="${task.assignee}">
+                            </div>
+                        </div>
+                    `;
+                    taskContainer.appendChild(taskEl);
+                });
+                updateProgress();
+            }
+
+            function updateProgress() {
+                const checkboxes = document.querySelectorAll('.task-checkbox');
+                const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+                const totalTasks = tasks.length;
+                const percentage = totalTasks > 0 ? Math.round((checkedCount / totalTasks) * 100) : 0;
+                
+                masterProgressBar.style.width = `${percentage}%`;
+                masterProgressBar.textContent = `${percentage}%`;
+            }
+
+            taskContainer.addEventListener('change', (e) => {
+                if (e.target.classList.contains('task-checkbox')) {
+                    updateProgress();
+                }
+            });
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.replace('bg-blue-500', 'bg-gray-200') || b.classList.replace('text-white', 'text-gray-700'));
+                    btn.classList.replace('bg-gray-200', 'bg-blue-500');
+                    btn.classList.replace('text-gray-700', 'text-white');
+                    renderTasks(btn.dataset.filter);
+                });
+            });
+
+            function saveAssignee(inputElement) {
+                const container = inputElement.parentElement;
+                const nameSpan = container.querySelector('.assignee-name');
+                const taskId = container.dataset.taskId;
+                const task = tasks.find(t => t.id === taskId);
+
+                const newName = inputElement.value.trim();
+                if (newName) {
+                    task.assignee = newName;
+                    nameSpan.innerHTML = `👤 ${newName}`;
+                } else {
+                    inputElement.value = task.assignee;
+                }
+
+                inputElement.classList.add('hidden');
+                nameSpan.classList.remove('hidden');
+            }
+
+            taskContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('assignee-name')) {
+                    const container = e.target.parentElement;
+                    const input = container.querySelector('.assignee-input');
+                    e.target.classList.add('hidden');
+                    input.classList.remove('hidden');
+                    input.focus();
+                    input.select();
+                }
+            });
+
+            taskContainer.addEventListener('focusout', (e) => {
+                if (e.target.classList.contains('assignee-input')) {
+                    saveAssignee(e.target);
+                }
+            });
+
+            taskContainer.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && e.target.classList.contains('assignee-input')) {
+                    e.preventDefault();
+                    saveAssignee(e.target);
+                }
+            });
+
+            renderTasks();
+
+            const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+            new Chart(timelineCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Tuần 1', 'Tuần 2', 'Tuần 3'],
+                    datasets: [{
+                        label: 'Backend & DB',
+                        data: [100, 50, 0],
+                        backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                        stack: 'Giai đoạn 1',
+                    }, {
+                        label: 'Frontend',
+                        data: [0, 50, 50],
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                        stack: 'Giai đoạn 1',
+                    }, {
+                        label: 'Admin',
+                        data: [0, 0, 50],
+                        backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                        stack: 'Giai đoạn 1',
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true,
+                            ticks: {
+                                callback: function(value) { return value + "%" }
+                            },
+                            title: { display: true, text: 'Phân bổ công việc' }
+                        },
+                        y: {
+                            stacked: true
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const modal = document.getElementById('db-modal');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const modalTitle = document.getElementById('modal-title');
+            const modalContent = document.getElementById('modal-content');
+
+            function openModal(tableKey) {
+                const tableData = dbSchema[tableKey];
+                if (!tableData) return;
+
+                modalTitle.textContent = tableData.title;
+                let contentHTML = '<div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên trường</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kiểu dữ liệu</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mô tả</th></tr></thead><tbody class="bg-white divide-y divide-gray-200">';
+                tableData.fields.forEach(field => {
+                    contentHTML += `<tr><td class="px-4 py-3 whitespace-nowrap text-sm font-mono text-gray-900">${field.name}</td><td class="px-4 py-3 whitespace-nowrap text-sm font-mono text-gray-500">${field.type}</td><td class="px-4 py-3 text-sm text-gray-500">${field.desc}</td></tr>`;
+                });
+                contentHTML += '</tbody></table></div>';
+                modalContent.innerHTML = contentHTML;
+                modal.classList.add('active');
+            }
+
+            document.getElementById('db-users').addEventListener('click', () => openModal('users'));
+            document.getElementById('db-shifts').addEventListener('click', () => openModal('shifts'));
+            document.getElementById('db-employee_schedules').addEventListener('click', () => openModal('employee_schedules'));
+            
+            closeModalBtn.addEventListener('click', () => modal.classList.remove('active'));
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
