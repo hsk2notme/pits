@@ -197,7 +197,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, doc, onSnapshot, updateDoc, setDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         document.addEventListener('DOMContentLoaded', async function () {
             const loadingOverlay = document.getElementById('loading');
@@ -206,33 +206,29 @@
             let db;
 
             try {
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'hrm-dashboard-default';
-                const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
-                const firebaseConfig = JSON.parse(firebaseConfigStr);
-                
-                if (!firebaseConfig.apiKey) {
-                    loadingOverlay.innerHTML = '<p class="text-red-500 font-bold">Lỗi: Không tìm thấy cấu hình Firebase.</p>';
-                    return;
-                }
+                // Cấu hình Firebase của bạn
+                const firebaseConfig = {
+                  apiKey: "AIzaSyDA6vJhpMGSJ9sLTFtwzGRZxhqaY3opg-8",
+                  authDomain: "hrm-dashboard-ecc67.firebaseapp.com",
+                  projectId: "hrm-dashboard-ecc67",
+                  storageBucket: "hrm-dashboard-ecc67.firebasestorage.app",
+                  messagingSenderId: "275914555309",
+                  appId: "1:275914555309:web:e28381686f6b2b70672b24",
+                  measurementId: "G-DEJ7R62WHH"
+                };
 
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 const auth = getAuth(app);
-
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                await signInAnonymously(auth);
 
             } catch (error) {
                 console.error("Firebase initialization failed:", error);
-                loadingOverlay.innerHTML = '<p class="text-red-500 font-bold">Không thể kết nối đến cơ sở dữ liệu.</p>';
+                loadingOverlay.innerHTML = '<p class="text-red-500 font-bold">Không thể kết nối đến cơ sở dữ liệu. Vui lòng kiểm tra lại cấu hình Firebase.</p>';
                 return;
             }
             
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'hrm-dashboard-default';
-            const tasksColRef = collection(db, `artifacts/${appId}/public/data/tasks`);
+            const tasksColRef = collection(db, "tasks");
 
             const initialTasks = [
                 { id: '1.1', category: 'backend', title: 'Khởi tạo Database', details: "- Tạo database `Web_HRM` trên PostgreSQL.<br>- Cấu hình quyền truy cập cho server.", assignee: 'Chưa gán', completed: false },
@@ -375,7 +371,7 @@
                 if (e.target.classList.contains('task-checkbox')) {
                     const taskId = e.target.dataset.taskId;
                     const completed = e.target.checked;
-                    const taskDocRef = doc(db, `artifacts/${appId}/public/data/tasks`, taskId);
+                    const taskDocRef = doc(db, "tasks", taskId);
                     try {
                         await updateDoc(taskDocRef, { completed: completed });
                     } catch (error) {
@@ -401,7 +397,7 @@
                 const newName = inputElement.value.trim();
                 
                 if (newName) {
-                    const taskDocRef = doc(db, `artifacts/${appId}/public/data/tasks`, taskId);
+                    const taskDocRef = doc(db, "tasks", taskId);
                     try {
                         await updateDoc(taskDocRef, { assignee: newName });
                     } catch (error) {
