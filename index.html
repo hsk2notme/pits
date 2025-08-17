@@ -66,15 +66,6 @@
         .progress-bar-fill {
             transition: width 0.5s ease-in-out;
         }
-        .assignee-name {
-            padding: 2px 4px;
-            border-radius: 4px;
-            border: 1px dashed transparent;
-        }
-        .assignee-name:hover {
-            border-color: #cbd5e1;
-            background-color: #f1f5f9;
-        }
         .loading-overlay {
             position: fixed;
             inset: 0;
@@ -84,6 +75,12 @@
             justify-content: center;
             z-index: 9999;
             transition: opacity 0.3s;
+        }
+        .stat-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
     </style>
 </head>
@@ -103,8 +100,9 @@
             <h1 class="text-xl md:text-2xl font-bold text-gray-800">Dashboard Kế hoạch HRM</h1>
             <div class="hidden md:flex space-x-8">
                 <a href="#overview" class="nav-link text-gray-600 hover:text-gray-800 font-medium">Tổng quan</a>
-                <a href="#architecture" class="nav-link text-gray-600 hover:text-gray-800 font-medium">Kiến trúc Hệ thống</a>
-                <a href="#plan" class="nav-link text-gray-600 hover:text-gray-800 font-medium">Kế hoạch Chi tiết</a>
+                <a href="#stats" class="nav-link text-gray-600 hover:text-gray-800 font-medium">Thống kê</a>
+                <a href="#architecture" class="nav-link text-gray-600 hover:text-gray-800 font-medium">Kiến trúc</a>
+                <a href="#plan" class="nav-link text-gray-600 hover:text-gray-800 font-medium">Kế hoạch</a>
             </div>
             <button id="mobile-menu-button" class="md:hidden text-gray-700 focus:outline-none">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
@@ -112,8 +110,9 @@
         </nav>
         <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
             <a href="#overview" class="block py-2 text-gray-600 hover:text-gray-800">Tổng quan</a>
-            <a href="#architecture" class="block py-2 text-gray-600 hover:text-gray-800">Kiến trúc Hệ thống</a>
-            <a href="#plan" class="block py-2 text-gray-600 hover:text-gray-800">Kế hoạch Chi tiết</a>
+            <a href="#stats" class="block py-2 text-gray-600 hover:text-gray-800">Thống kê</a>
+            <a href="#architecture" class="block py-2 text-gray-600 hover:text-gray-800">Kiến trúc</a>
+            <a href="#plan" class="block py-2 text-gray-600 hover:text-gray-800">Kế hoạch</a>
         </div>
     </header>
 
@@ -131,9 +130,34 @@
             </div>
         </section>
 
+        <section id="stats" class="mb-16 scroll-mt-24">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Thống kê Công việc</h2>
+            <p class="text-lg text-gray-600 mb-8">Tổng quan về tình hình phân công và tiến độ hoàn thành công việc của đội ngũ.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="stat-card text-center">
+                    <h4 class="text-lg font-semibold text-gray-500">Tổng số công việc</h4>
+                    <p id="total-tasks" class="text-4xl font-bold text-gray-800">0</p>
+                </div>
+                <div class="stat-card text-center">
+                    <h4 class="text-lg font-semibold text-gray-500">Đã phân công</h4>
+                    <p id="assigned-tasks" class="text-4xl font-bold text-green-600">0</p>
+                </div>
+                <div class="stat-card text-center">
+                    <h4 class="text-lg font-semibold text-gray-500">Chưa phân công</h4>
+                    <p id="unassigned-tasks" class="text-4xl font-bold text-yellow-600">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <h3 class="text-xl font-bold text-gray-700 mb-4">Tiến độ cá nhân</h3>
+                <div id="member-stats-container" class="space-y-4">
+                    <p class="text-gray-500">Chưa có dữ liệu...</p>
+                </div>
+            </div>
+        </section>
+
         <section id="architecture" class="mb-16 scroll-mt-24">
             <h2 class="text-3xl font-bold text-gray-800 mb-2">Kiến trúc Hệ thống</h2>
-            <p class="text-lg text-gray-600 mb-8">Hệ thống bao gồm giao diện cho Nhân viên và Admin, hoạt động trên nền tảng Server Node.js và cơ sở dữ liệu PostgreSQL. Dưới đây là sơ đồ các bảng dữ liệu chính và mối quan hệ giữa chúng.</p>
+            <p class="text-lg text-gray-600 mb-8">Sơ đồ các bảng dữ liệu chính và mối quan hệ giữa chúng trong cơ sở dữ liệu PostgreSQL.</p>
 
             <div class="bg-white p-6 rounded-lg shadow-lg">
                 <h3 class="text-xl font-bold text-gray-700 mb-6 text-center">Sơ đồ Cơ sở dữ liệu "Web_HRM"</h3>
@@ -152,17 +176,13 @@
                             <p class="text-sm text-purple-600">Lịch đăng ký ca làm</p>
                         </div>
                     </div>
-                    <div class="text-gray-500 text-sm mt-4">
-                        <p>&#x2193; `employee_schedules` tham chiếu đến `users` và `shifts` &#x2193;</p>
-                        <p class="text-center">(Click vào bảng để xem chi tiết)</p>
-                    </div>
                 </div>
             </div>
         </section>
 
         <section id="plan" class="scroll-mt-24">
             <h2 class="text-3xl font-bold text-gray-800 mb-2">Kế hoạch Công việc Chi tiết</h2>
-            <p class="text-lg text-gray-600 mb-6">Danh sách các công việc cần hoàn thành trong Giai đoạn 1, được phân chia theo từng hạng mục. Tích vào các công việc đã hoàn thành để theo dõi tiến độ.</p>
+            <p class="text-lg text-gray-600 mb-6">Tích vào các công việc đã hoàn thành và phân công người thực hiện để theo dõi tiến độ.</p>
             
             <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
                 <h3 class="text-xl font-bold text-gray-700 mb-4">Tiến độ Tổng thể Giai đoạn 1</h3>
@@ -196,7 +216,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, doc, onSnapshot, updateDoc, setDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, onSnapshot, updateDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         document.addEventListener('DOMContentLoaded', async function () {
@@ -204,9 +224,9 @@
             
             let tasks = [];
             let db;
+            const assignees = ["Trường Sơn", "Minh Dương", "Gia Bảo", "Việt Dũng"];
 
             try {
-                // Cấu hình Firebase của bạn
                 const firebaseConfig = {
                   apiKey: "AIzaSyDA6vJhpMGSJ9sLTFtwzGRZxhqaY3opg-8",
                   authDomain: "hrm-dashboard-ecc67.firebaseapp.com",
@@ -267,45 +287,10 @@
                 tasks.sort((a, b) => parseFloat(a.id) - parseFloat(b.id));
                 const currentFilter = document.querySelector('.filter-btn.bg-blue-500')?.dataset.filter || 'all';
                 renderTasks(currentFilter);
+                updateStatistics();
                 loadingOverlay.style.opacity = '0';
                 setTimeout(() => loadingOverlay.style.display = 'none', 300);
             });
-
-            const dbSchema = {
-                users: {
-                    title: "Bảng `users`",
-                    fields: [
-                        { name: "id", type: "BIGINT, PRIMARY KEY", desc: "Mã số nhân viên" },
-                        { name: "full_name", type: "VARCHAR", desc: "Họ và tên" },
-                        { name: "email", type: "VARCHAR, UNIQUE", desc: "Email" },
-                        { name: "department", type: "VARCHAR", desc: "Phòng ban" },
-                        { name: "work_type", type: "ENUM", desc: "'Full-time', 'Part-time'" },
-                        { name: "password_hash", type: "VARCHAR", desc: "Mật khẩu đã mã hóa" },
-                        { name: "is_admin", type: "BOOLEAN", desc: "Phân quyền quản trị" },
-                        { name: "is_password_default", type: "BOOLEAN", desc: "Cờ báo mật khẩu mặc định" },
-                        { name: "created_at", type: "TIMESTAMP", desc: "Thời gian tạo tài khoản" },
-                    ]
-                },
-                shifts: {
-                    title: "Bảng `shifts`",
-                    fields: [
-                        { name: "id", type: "SMALLINT, PRIMARY KEY", desc: "ID ca làm" },
-                        { name: "shift_name", type: "ENUM", desc: "'Sáng', 'Chiều', 'Tối'" },
-                    ]
-                },
-                employee_schedules: {
-                    title: "Bảng `employee_schedules`",
-                    fields: [
-                        { name: "id", type: "BIGINT, PRIMARY KEY", desc: "ID bản ghi lịch trình" },
-                        { name: "user_id", type: "BIGINT, FOREIGN KEY", desc: "Nhân viên đăng ký" },
-                        { name: "schedule_date", type: "DATE", desc: "Ngày làm việc" },
-                        { name: "shift_id", type: "SMALLINT, FOREIGN KEY", desc: "Ca làm đã đăng ký" },
-                        { name: "shift_part", type: "ENUM", desc: "'Full', 'First Half', 'Second Half'" },
-                        { name: "status", type: "ENUM", desc: "'pending', 'approved', 'rejected', 'leave'" },
-                        { name: "comment", type: "TEXT", desc: "Ghi chú" },
-                    ]
-                }
-            };
 
             const taskContainer = document.getElementById('task-container');
             const filterBtns = document.querySelectorAll('.filter-btn');
@@ -328,10 +313,17 @@
                 taskContainer.innerHTML = '';
                 const filteredTasks = filter === 'all' ? tasks : tasks.filter(t => t.category === filter);
 
+                const assigneeOptions = ['Chưa gán', ...assignees].map(name => 
+                    `<option value="${name}">${name}</option>`
+                ).join('');
+
                 filteredTasks.forEach(task => {
                     const taskEl = document.createElement('div');
                     taskEl.className = `task-card bg-white p-5 rounded-lg shadow-md ${categoryColors[task.category]} flex flex-col`;
                     taskEl.dataset.category = task.category;
+                    
+                    const selectHTML = `<select data-task-id="${task.id}" class="assignee-select w-full p-1 border rounded text-sm">${assigneeOptions}</select>`;
+
                     taskEl.innerHTML = `
                         <div class="flex-grow">
                             <div class="flex justify-between items-start mb-2">
@@ -341,42 +333,88 @@
                             <h4 class="font-bold text-lg text-gray-800 mb-3">${task.title}</h4>
                             <div class="text-sm text-gray-600 space-y-1">${task.details}</div>
                         </div>
-                        <div class="mt-4 pt-4 border-t flex justify-between items-center">
+                        <div class="mt-4 pt-4 border-t space-y-3">
                             <div class="flex items-center">
                                 <input type="checkbox" id="task-${task.id}" data-task-id="${task.id}" class="task-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500" ${task.completed ? 'checked' : ''}>
                                 <label for="task-${task.id}" class="ml-3 block text-sm font-medium text-gray-700">Hoàn thành</label>
                             </div>
-                            <div class="assignee-container text-sm text-gray-600" data-task-id="${task.id}">
-                                <span class="assignee-name cursor-pointer" title="Click để sửa">👤 ${task.assignee}</span>
-                                <input type="text" class="assignee-input hidden w-28 border rounded px-1 py-0.5 text-sm" value="${task.assignee}">
+                            <div class="assignee-container text-sm text-gray-600">
+                                ${selectHTML}
                             </div>
                         </div>
                     `;
                     taskContainer.appendChild(taskEl);
+                    taskEl.querySelector(`.assignee-select`).value = task.assignee;
                 });
                 updateProgress();
             }
 
             function updateProgress() {
-                if (!tasks) return;
+                if (!tasks || tasks.length === 0) return;
                 const checkedCount = tasks.filter(t => t.completed).length;
                 const totalTasks = tasks.length;
-                const percentage = totalTasks > 0 ? Math.round((checkedCount / totalTasks) * 100) : 0;
+                const percentage = Math.round((checkedCount / totalTasks) * 100);
                 
                 masterProgressBar.style.width = `${percentage}%`;
                 masterProgressBar.textContent = `${percentage}%`;
             }
 
-            taskContainer.addEventListener('change', async (e) => {
-                if (e.target.classList.contains('task-checkbox')) {
-                    const taskId = e.target.dataset.taskId;
-                    const completed = e.target.checked;
-                    const taskDocRef = doc(db, "tasks", taskId);
-                    try {
-                        await updateDoc(taskDocRef, { completed: completed });
-                    } catch (error) {
-                        console.error("Error updating task status: ", error);
+            function updateStatistics() {
+                if (!tasks || tasks.length === 0) return;
+
+                const unassignedCount = tasks.filter(t => t.assignee === 'Chưa gán').length;
+                const assignedCount = tasks.length - unassignedCount;
+
+                document.getElementById('total-tasks').textContent = tasks.length;
+                document.getElementById('assigned-tasks').textContent = assignedCount;
+                document.getElementById('unassigned-tasks').textContent = unassignedCount;
+                
+                const memberStats = {};
+                assignees.forEach(name => {
+                    memberStats[name] = { assigned: 0, completed: 0 };
+                });
+
+                tasks.forEach(task => {
+                    if (assignees.includes(task.assignee)) {
+                        memberStats[task.assignee].assigned++;
+                        if (task.completed) {
+                            memberStats[task.assignee].completed++;
+                        }
                     }
+                });
+
+                const statsContainer = document.getElementById('member-stats-container');
+                statsContainer.innerHTML = '';
+                
+                Object.entries(memberStats).forEach(([name, stats]) => {
+                    const percentage = stats.assigned > 0 ? Math.round((stats.completed / stats.assigned) * 100) : 0;
+                    const memberEl = document.createElement('div');
+                    memberEl.innerHTML = `
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-semibold text-gray-700">${name}</span>
+                            <span class="text-sm text-gray-500">${stats.completed} / ${stats.assigned} việc</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${percentage}%"></div>
+                        </div>
+                    `;
+                    statsContainer.appendChild(memberEl);
+                });
+            }
+
+            taskContainer.addEventListener('change', async (e) => {
+                const target = e.target;
+                if (target.classList.contains('task-checkbox')) {
+                    const taskId = target.dataset.taskId;
+                    const completed = target.checked;
+                    const taskDocRef = doc(db, "tasks", taskId);
+                    await updateDoc(taskDocRef, { completed: completed });
+                }
+                if (target.classList.contains('assignee-select')) {
+                    const taskId = target.dataset.taskId;
+                    const assignee = target.value;
+                    const taskDocRef = doc(db, "tasks", taskId);
+                    await updateDoc(taskDocRef, { assignee: assignee });
                 }
             });
 
@@ -389,147 +427,19 @@
                 });
             });
 
-            async function saveAssignee(inputElement) {
-                const container = inputElement.parentElement;
-                const nameSpan = container.querySelector('.assignee-name');
-                const taskId = container.dataset.taskId;
-                
-                const newName = inputElement.value.trim();
-                
-                if (newName) {
-                    const taskDocRef = doc(db, "tasks", taskId);
-                    try {
-                        await updateDoc(taskDocRef, { assignee: newName });
-                    } catch (error) {
-                         console.error("Error updating assignee: ", error);
-                    }
-                }
-                
-                inputElement.classList.add('hidden');
-                nameSpan.classList.remove('hidden');
-            }
-
-            taskContainer.addEventListener('click', (e) => {
-                if (e.target.classList.contains('assignee-name')) {
-                    const container = e.target.parentElement;
-                    const input = container.querySelector('.assignee-input');
-                    e.target.classList.add('hidden');
-                    input.classList.remove('hidden');
-                    input.focus();
-                    input.select();
-                }
-            });
-
-            taskContainer.addEventListener('focusout', (e) => {
-                if (e.target.classList.contains('assignee-input')) {
-                    saveAssignee(e.target);
-                }
-            });
-
-            taskContainer.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && e.target.classList.contains('assignee-input')) {
-                    e.preventDefault();
-                    saveAssignee(e.target);
-                }
-            });
-
+            // --- Các hàm khởi tạo biểu đồ và modal không thay đổi ---
             const timelineCtx = document.getElementById('timelineChart').getContext('2d');
             new Chart(timelineCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Tuần 1', 'Tuần 2', 'Tuần 3'],
-                    datasets: [{
-                        label: 'Backend & DB',
-                        data: [100, 50, 0],
-                        backgroundColor: 'rgba(239, 68, 68, 0.6)',
-                        stack: 'Giai đoạn 1',
-                    }, {
-                        label: 'Frontend',
-                        data: [0, 50, 50],
-                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                        stack: 'Giai đoạn 1',
-                    }, {
-                        label: 'Admin',
-                        data: [0, 0, 50],
-                        backgroundColor: 'rgba(16, 185, 129, 0.6)',
-                        stack: 'Giai đoạn 1',
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            stacked: true,
-                            ticks: {
-                                callback: function(value) { return value + "%" }
-                            },
-                            title: { display: true, text: 'Phân bổ công việc' }
-                        },
-                        y: {
-                            stacked: true
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `${context.dataset.label}: ${context.raw}%`;
-                                }
-                            }
-                        }
-                    }
-                }
+                type: 'bar', data: { labels: ['Tuần 1', 'Tuần 2', 'Tuần 3'], datasets: [{ label: 'Backend & DB', data: [100, 50, 0], backgroundColor: 'rgba(239, 68, 68, 0.6)', stack: 'Giai đoạn 1' }, { label: 'Frontend', data: [0, 50, 50], backgroundColor: 'rgba(59, 130, 246, 0.6)', stack: 'Giai đoạn 1' }, { label: 'Admin', data: [0, 0, 50], backgroundColor: 'rgba(16, 185, 129, 0.6)', stack: 'Giai đoạn 1' }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, ticks: { callback: function(value) { return value + "%" } }, title: { display: true, text: 'Phân bổ công việc' } }, y: { stacked: true } }, plugins: { tooltip: { callbacks: { label: function(context) { return `${context.dataset.label}: ${context.raw}%`; } } } } }
             });
-
-            const modal = document.getElementById('db-modal');
-            const closeModalBtn = document.getElementById('close-modal-btn');
-            const modalTitle = document.getElementById('modal-title');
-            const modalContent = document.getElementById('modal-content');
-
-            function openModal(tableKey) {
-                const tableData = dbSchema[tableKey];
-                if (!tableData) return;
-
-                modalTitle.textContent = tableData.title;
-                let contentHTML = '<div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên trường</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kiểu dữ liệu</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mô tả</th></tr></thead><tbody class="bg-white divide-y divide-gray-200">';
-                tableData.fields.forEach(field => {
-                    contentHTML += `<tr><td class="px-4 py-3 whitespace-nowrap text-sm font-mono text-gray-900">${field.name}</td><td class="px-4 py-3 whitespace-nowrap text-sm font-mono text-gray-500">${field.type}</td><td class="px-4 py-3 text-sm text-gray-500">${field.desc}</td></tr>`;
-                });
-                contentHTML += '</tbody></table></div>';
-                modalContent.innerHTML = contentHTML;
-                modal.classList.add('active');
-            }
-
-            document.getElementById('db-users').addEventListener('click', () => openModal('users'));
-            document.getElementById('db-shifts').addEventListener('click', () => openModal('shifts'));
-            document.getElementById('db-employee_schedules').addEventListener('click', () => openModal('employee_schedules'));
-            
-            closeModalBtn.addEventListener('click', () => modal.classList.remove('active'));
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
-                }
-            });
-
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mobileMenu = document.getElementById('mobile-menu');
-            mobileMenuButton.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-            });
-
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    document.querySelector(this.getAttribute('href')).scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                    if (!mobileMenu.classList.contains('hidden')) {
-                        mobileMenu.classList.add('hidden');
-                    }
-                });
-            });
+            const dbSchema = { users: { title: "Bảng `users`", fields: [ { name: "id", type: "BIGINT, PRIMARY KEY", desc: "Mã số nhân viên" }, { name: "full_name", type: "VARCHAR", desc: "Họ và tên" }, { name: "email", type: "VARCHAR, UNIQUE", desc: "Email" }, { name: "department", type: "VARCHAR", desc: "Phòng ban" }, { name: "work_type", type: "ENUM", desc: "'Full-time', 'Part-time'" }, { name: "password_hash", type: "VARCHAR", desc: "Mật khẩu đã mã hóa" }, { name: "is_admin", type: "BOOLEAN", desc: "Phân quyền quản trị" }, { name: "is_password_default", type: "BOOLEAN", desc: "Cờ báo mật khẩu mặc định" }, { name: "created_at", type: "TIMESTAMP", desc: "Thời gian tạo tài khoản" } ] }, shifts: { title: "Bảng `shifts`", fields: [ { name: "id", type: "SMALLINT, PRIMARY KEY", desc: "ID ca làm" }, { name: "shift_name", type: "ENUM", desc: "'Sáng', 'Chiều', 'Tối'" } ] }, employee_schedules: { title: "Bảng `employee_schedules`", fields: [ { name: "id", type: "BIGINT, PRIMARY KEY", desc: "ID bản ghi lịch trình" }, { name: "user_id", type: "BIGINT, FOREIGN KEY", desc: "Nhân viên đăng ký" }, { name: "schedule_date", type: "DATE", desc: "Ngày làm việc" }, { name: "shift_id", type: "SMALLINT, FOREIGN KEY", desc: "Ca làm đã đăng ký" }, { name: "shift_part", type: "ENUM", desc: "'Full', 'First Half', 'Second Half'" }, { name: "status", type: "ENUM", desc: "'pending', 'approved', 'rejected', 'leave'" }, { name: "comment", type: "TEXT", desc: "Ghi chú" } ] } };
+            const modal = document.getElementById('db-modal'); const closeModalBtn = document.getElementById('close-modal-btn'); const modalTitle = document.getElementById('modal-title'); const modalContent = document.getElementById('modal-content');
+            function openModal(tableKey) { const tableData = dbSchema[tableKey]; if (!tableData) return; modalTitle.textContent = tableData.title; let contentHTML = '<div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên trường</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kiểu dữ liệu</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mô tả</th></tr></thead><tbody class="bg-white divide-y divide-gray-200">'; tableData.fields.forEach(field => { contentHTML += `<tr><td class="px-4 py-3 whitespace-nowrap text-sm font-mono text-gray-900">${field.name}</td><td class="px-4 py-3 whitespace-nowrap text-sm font-mono text-gray-500">${field.type}</td><td class="px-4 py-3 text-sm text-gray-500">${field.desc}</td></tr>`; }); contentHTML += '</tbody></table></div>'; modalContent.innerHTML = contentHTML; modal.classList.add('active'); }
+            document.getElementById('db-users').addEventListener('click', () => openModal('users')); document.getElementById('db-shifts').addEventListener('click', () => openModal('shifts')); document.getElementById('db-employee_schedules').addEventListener('click', () => openModal('employee_schedules'));
+            closeModalBtn.addEventListener('click', () => modal.classList.remove('active')); modal.addEventListener('click', (e) => { if (e.target === modal) { modal.classList.remove('active'); } });
+            const mobileMenuButton = document.getElementById('mobile-menu-button'); const mobileMenu = document.getElementById('mobile-menu'); mobileMenuButton.addEventListener('click', () => { mobileMenu.classList.toggle('hidden'); });
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => { anchor.addEventListener('click', function (e) { e.preventDefault(); document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' }); if (!mobileMenu.classList.contains('hidden')) { mobileMenu.classList.add('hidden'); } }); });
         });
     </script>
 </body>
